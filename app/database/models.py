@@ -52,7 +52,7 @@ class Contractor(Base):
     
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(50), unique=True)
-    contact_information: Mapped[str] = mapped_column(String(50))
+    contact_information: Mapped[str] = mapped_column(String(50), unique=True)
     method: Mapped[ReceiptMethod] = mapped_column(default=ReceiptMethod.EMAIL)
     dates: Mapped[List["Date"]] = relationship(back_populates='contractors', secondary='contractor_date_link', lazy='selectin')
 

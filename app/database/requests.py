@@ -28,7 +28,7 @@ async def create_date(*, d, th, text) -> bool:
             print(e)
             return False
 
-async def add_contractor(*, name: str, contact_information: str):
+async def add_contractor(*, name: str, contact_information: str) -> bool:
     async with async_session() as session:
         try:
             contractor = Contractor(name=name, contact_information=contact_information)
@@ -38,8 +38,10 @@ async def add_contractor(*, name: str, contact_information: str):
         
             session.add(contractor)
             await session.commit()
+            return True
         except Exception as e:
             print("add cont: ", e)
+            return False
 
 async def add_contractor_by_date_id(*, dt_id: int, cont_id: int) -> bool:
     async with async_session() as session:
