@@ -11,11 +11,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# DATABASE_URL = os.getenv(
-#     "DATABASE_URL",  # имя переменной окружения
-#     "postgresql+asyncpg://postgres:root@host.docker.internal:5432/sender"  # дефолт, если переменная не задана
-# )
-
 db_url = URL.create(
     drivername="postgresql+asyncpg",
     username=os.getenv("DB_USERNAME", "postgres"),
@@ -24,8 +19,6 @@ db_url = URL.create(
     port=int(os.getenv("DB_PORT", "5432")),
     database=os.getenv("DB_NAME", "sender"),
 )
-
-# db_url = "postgresql+asyncpg://postgres:root@localhost:5432/sender"
 
 engine = create_async_engine(url=db_url, echo=True)
 
@@ -62,7 +55,3 @@ class ContractorDateLink(Base):
     contractor_id: Mapped[int] = mapped_column(ForeignKey('contractors.id'), primary_key=True)
     date_id: Mapped[int] = mapped_column(ForeignKey('dates.id'), primary_key=True)
     
-# async def async_main():
-    # async with engine.begin() as conn:
-        # await conn.run_sync(Base.metadata.drop_all)
-        # await conn.run_sync(Base.metadata.create_all)

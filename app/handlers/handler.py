@@ -15,8 +15,7 @@ router = Router()
 
 @router.message(CommandStart())
 async def cmd_start(message: Message):
-    # users = await User.get_users() получение контрагентов из бд для заполнения клавиатуры
-    await message.answer("Выбери действие", reply_markup=start_menu()) #await show_users(users)  
+    await message.answer("Выбери действие", reply_markup=start_menu())
     print(message.chat.id)
    
 #Command("start")
@@ -92,21 +91,4 @@ async def del_date(callback: CallbackQuery):
     date_id = int(callback.data.replace("deldate_", ""))
     await delete_date(date_id)
     await show_dates(callback)
-
-# async def back_date(message: Message, **kwargs):
-#     date_id = kwargs["date_id"]
-#     kb = us(date_id)
-#     await message.edit_text(f'Дата отправки: {chosen_date.date}\nТема сообщения: {chosen_date.theme}\nТекст для отправки: {chosen_date.text_for_send}', reply_markup=kb)
-
-# @router.callback_query(F.data.startswith('cont_'))
-# async def all_contractors(callback: CallbackQuery):
-#     await callback.answer()
-#     id = callback.data.replace('cont_', '')
-    
-#     my_user = await User.get_one(id=id)
-    
-#     contractor_name = my_user.contractor_name
-#     email = my_user.email
-    
-#     await callback.message.edit_text(f"Имя контрагента: {contractor_name}\nПочта: {email}\n")
     

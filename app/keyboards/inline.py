@@ -119,17 +119,3 @@ async def add_contractor_by_date_buttons(date_id: int):
     
     builder.adjust(2)
     return builder.as_markup()
-
-# def clean_contractor_by_date_buttons(date_id: int, contractor_id: int):
-#     builder = InlineKeyboardBuilder()
-#     builder.row(
-#         InlineKeyboardButton(
-#             text="Отвязать", callback_data=f'cl_{date_id}_{contractor_id}'
-#         ),
-#         InlineKeyboardButton(
-#             text="Назад", callback_data=f'dt_{date_id}'
-#         )
-#     )
-    
-#     builder.adjust(2)
-#     return builder.as_markup()
