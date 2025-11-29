@@ -48,7 +48,7 @@ async def main():
         print("Shutting down...")
         scheduler.shutdown(wait=False)
         await bot.session.close()
-        # await engine.dispose()
+        await engine.dispose()
     
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
