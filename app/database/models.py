@@ -22,7 +22,7 @@ db_url = URL.create(
 
 engine = create_async_engine(url=db_url, echo=True)
 
-async_session = async_sessionmaker(engine)
+async_session = async_sessionmaker(engine, expire_on_commit=False)
 
 class Base(AsyncAttrs, DeclarativeBase): pass
 

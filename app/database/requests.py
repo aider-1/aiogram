@@ -13,7 +13,7 @@ async def get_contractors() -> list[Contractor]:
     async with async_session() as session:
         query = select(Contractor)
         contractors = await session.execute(query)
-        
+
         return contractors.scalars().all()
 
 async def create_date(*, d, th, text) -> bool:
@@ -66,18 +66,18 @@ async def get_dates() -> Date:
 
 async def get_date_by_id(id: int) -> Date:
     async with async_session() as session:
-        date = await session.get_one(Date, id)
+        date = await session.get(Date, id)
         return date
    
 async def get_contractor_by_id(contractor_id: int) -> Contractor:
     async with async_session() as session:
-        contractor = await session.get_one(Contractor, contractor_id)
+        contractor = await session.get(Contractor, contractor_id)
         return contractor
 
 async def delete_contractor(contractor_id: int) -> bool:
     async with async_session() as session:
         try:
-            contractor = await session.get_one(Contractor, contractor_id)
+            contractor = await session.get(Contractor, contractor_id)
             await session.delete(contractor)
             await session.commit()
             
