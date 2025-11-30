@@ -11,6 +11,8 @@ from apscheduler.triggers.cron import CronTrigger
 from app.database.models import engine
 from app.scheduler.sched import send_scheduled_message
 from dotenv import load_dotenv
+import psutil
+from app.mem.memory_debug import log_memory_loop
 
 load_dotenv()
 
@@ -39,6 +41,8 @@ async def main():
         dp.include_router(router=router)
         dp.include_router(router=contractors)
         dp.include_router(router=dates)
+        
+        asyncio.create_task(log_memory_loop(interval=10))
     
         await bot.delete_webhook(drop_pending_updates=True)
         await dp.start_polling(bot)

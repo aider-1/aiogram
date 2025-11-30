@@ -20,7 +20,7 @@ db_url = URL.create(
     database=os.getenv("DB_NAME", "sender"),
 )
 
-engine = create_async_engine(url=db_url, echo=True)
+engine = create_async_engine(url=db_url)
 
 async_session = async_sessionmaker(engine, expire_on_commit=False)
 
