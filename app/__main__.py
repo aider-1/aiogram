@@ -1,16 +1,19 @@
-import asyncio
-import logging
 from aiogram import Bot, Dispatcher
-from app.handlers.handler import router
-from app.handlers.create_contractor import contractors
-from app.handlers.create_date import dates
-# from app.database.models import async_main
+from app.handlers.main_handler import router
+from app.handlers.contracrors.create_contractor import contractors
+from app.handlers.dates.create_date import dates
+from app.handlers.dates.cal_navigate import cal
+from app.handlers.contracrors.contractors_navigate import cont_route
+from app.handlers.profile.profile import profile_router
 import os
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from app.scheduler.sched import send_scheduled_message
 from apscheduler.triggers.cron import CronTrigger
 from app.database.models import engine
-from app.scheduler.sched import send_scheduled_message
 from dotenv import load_dotenv
+import asyncio
+import logging
+
 
 load_dotenv()
 
@@ -23,23 +26,23 @@ dp = Dispatcher()
 async def main():
     try:
         scheduler = AsyncIOScheduler()
-        # await async_main()
         
         scheduler.add_job(
             send_scheduled_message,
-            trigger=CronTrigger(minute="*/30", hour="12-22", timezone=time_zone),
+            trigger=CronTrigger(minute="*/15", hour="12-23", timezone=time_zone), #"*/1"
             id="send_scheduled_message",
             coalesce=True,
             max_instances=1,
             misfire_grace_time=300
         )
-        
         scheduler.start()
     
         dp.include_router(router=router)
         dp.include_router(router=contractors)
         dp.include_router(router=dates)
-    
+        dp.include_router(router=cal)
+        dp.include_router(router=cont_route)
+        dp.include_router(router=profile_router)
         await bot.delete_webhook(drop_pending_updates=True)
         await dp.start_polling(bot)
     except Exception as e:

@@ -9,18 +9,8 @@
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres_password}
       POSTGRES_DB: ${DB_NAME:-postgres_db}
       PGDATA: /var/lib/postgresql/data/pgdata
-    expose:
-      - "5432"
     volumes:
       - pgdata:/var/lib/postgresql/data/pgdata
-    deploy:
-      resources:
-        limits:
-          cpus: '0.50'
-          memory: 512M
-        reservations:
-          cpus: '0.25'
-          memory: 256M
     command: >
       postgres -c max_connections=1000
                -c shared_buffers=256MB
@@ -41,7 +31,7 @@
   app:
     build:
       context: .
-      dockerfile: app/Dockerfile
+      dockerfile: ./app/Dockerfile
     container_name: aiogram_app
     working_dir: /aiogram
     command: python -m app

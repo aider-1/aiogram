@@ -3,9 +3,9 @@ from aiogram import F
 from aiogram.types import Message, callback_query
 from aiogram.types.callback_query import CallbackQuery
 from aiogram.fsm.context import FSMContext
-from ..states.states import Create
-from ..database.requests import add_contractor as add_contractor_to_db
-from ..keyboards.inline import contractor_list_buttons
+from ...states.states import Create
+from ...database.requests import add_contractor as add_contractor_to_db
+from ...keyboards.inline import contractor_list_buttons
 
 contractors = Router()
 

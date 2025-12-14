@@ -1,20 +1,17 @@
 from typing import List, Optional
-from sqlalchemy import String, ForeignKey, DateTime, URL
+from sqlalchemy import CheckConstraint, Integer, String, ForeignKey, DateTime, URL
 from sqlalchemy import Date as SQLAlchemyDate
+from sqlalchemy import DateTime
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.ext.asyncio import AsyncAttrs, create_async_engine
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from enum import Enum
 import os
 from datetime import date as dt
+from datetime import datetime
 from dotenv import load_dotenv
 
 load_dotenv()
-
-# DATABASE_URL = os.getenv(
-#     "DATABASE_URL",  # имя переменной окружения
-#     "postgresql+asyncpg://postgres:root@host.docker.internal:5432/sender"  # дефолт, если переменная не задана
-# )
 
 db_url = URL.create(
     drivername="postgresql+asyncpg",
@@ -25,11 +22,9 @@ db_url = URL.create(
     database=os.getenv("DB_NAME", "sender"),
 )
 
-# db_url = "postgresql+asyncpg://postgres:root@localhost:5432/sender"
-
 engine = create_async_engine(url=db_url, echo=True)
 
-async_session = async_sessionmaker(engine)
+async_session = async_sessionmaker(engine, expire_on_commit=False)
 
 class Base(AsyncAttrs, DeclarativeBase): pass
 
@@ -37,10 +32,12 @@ class Date(Base):
     __tablename__ = 'dates'
     
     id: Mapped[int] = mapped_column(primary_key=True)
-    date: Mapped[str] = mapped_column(String(2), unique=True)
-    theme: Mapped[str] = mapped_column(String(100))
-    text_for_send: Mapped[str] = mapped_column(String(700))
-    last_sent: Mapped[Optional[dt]] = mapped_column(SQLAlchemyDate(), nullable=True)
+    date: Mapped[dt] = mapped_column(SQLAlchemyDate(), unique=True)
+    theme: Mapped[Optional[str]] = mapped_column(String(700), nullable=True)
+    text_for_send: Mapped[Optional[str]] = mapped_column(
+        String(700),
+        nullable=True,
+    )
     contractors: Mapped[List["Contractor"]] = relationship(back_populates='dates', secondary='contractor_date_link', lazy='selectin')
 
 class ReceiptMethod(Enum):
@@ -61,8 +58,13 @@ class ContractorDateLink(Base):
     
     contractor_id: Mapped[int] = mapped_column(ForeignKey('contractors.id'), primary_key=True)
     date_id: Mapped[int] = mapped_column(ForeignKey('dates.id'), primary_key=True)
-    
-# async def async_main():
-    # async with engine.begin() as conn:
-        # await conn.run_sync(Base.metadata.drop_all)
-        # await conn.run_sync(Base.metadata.create_all)
+    last_sent: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+
+class Profile(Base):
+    __tablename__ = "profile"
+    __table_args__ = (CheckConstraint("id = 1", name="ck_profile_singleton"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True, server_default="1")
+    name: Mapped[str] = mapped_column(nullable=False)
+    email: Mapped[str] = mapped_column(nullable=False, unique=True, index=True)
+    email_password: Mapped[str] = mapped_column(nullable=False)

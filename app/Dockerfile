@@ -1,6 +1,6 @@
-FROM python:3.13
+FROM python:3.13-slim
 
-WORKDIR /aiogram/app
+WORKDIR /aiogram2/app
 
 RUN pip install --upgrade pip
 RUN pip install --upgrade setuptools
