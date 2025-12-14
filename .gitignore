@@ -2,3 +2,4 @@
 .venv
 /test
 .dockerignore
+__pycache__/
