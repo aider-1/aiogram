@@ -31,5 +31,3 @@ def show_profile():
     
     builder.adjust(2)
     return builder.as_markup()
-
-#back_start
