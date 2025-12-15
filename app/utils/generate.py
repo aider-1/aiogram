@@ -1,4 +1,8 @@
 from fernet import Fernet
+from app.utils.config import acces_ids
+
+def get_ids_array():
+    return [int(id) for id in acces_ids.split(":")]
 
 DATE_WEEK = ["Пн", "Вт", "Ср", "Чт", "Пт",]
 

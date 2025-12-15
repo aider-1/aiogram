@@ -44,6 +44,7 @@ async def set_email_password_profile(message: Message, state: FSMContext):
     is_profile = await get_profile()
     
     await set_profile(name=data.get("name"), email=data.get("email"), email_password=data.get("email_password")) if not is_profile else await update_profile(name=data.get("name"), email=data.get("email"), email_password=data.get("email_password"))
+    
     await state.clear()
     
     profile = await get_profile()

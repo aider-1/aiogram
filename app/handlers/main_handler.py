@@ -11,8 +11,10 @@ from ..keyboards.inline import contractor_buttons, contractor_list_buttons, add_
 from ..keyboards.inline import start_menu
 from ..keyboards.profile_inline import create_profile
 from ..states.states import UpdateText
+from app.middleware.access_middleware import AccessMiddleware
 
 router = Router()
+router.message.middleware(AccessMiddleware())
 
 @router.message(CommandStart())
 async def cmd_start(message: Message):

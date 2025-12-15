@@ -5,3 +5,4 @@ load_dotenv()
 
 tz_name = os.getenv("TIME_ZONE", "Asia/Yekaterinburg")
 secret_key = os.getenv("SECRET_KEY").encode()
+acces_ids = os.getenv("ALLOWED_IDS")
