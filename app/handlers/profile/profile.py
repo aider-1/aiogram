@@ -6,6 +6,8 @@ from app.states.states import CreateProfile, Testing
 from app.database.requests import get_profile, set_profile, update_profile
 from app.keyboards.profile_inline import show_profile, create_profile
 from app.scheduler.send_mail import send_test_mail
+from app.utils.config import secret_key
+from app.utils.generate import EmailCrypto
 
 profile_router = Router()
 
@@ -14,7 +16,7 @@ async def main_profile(callback: CallbackQuery):
     await callback.answer()
     profile = await get_profile()
     
-    await callback.message.edit_text(f"Имя отправителя: {profile.name}\nПочта: {profile.email}", reply_markup=show_profile()) if profile else print("Ошибка при взаимодействии с профилем")
+    await callback.message.edit_text(f"👤Имя отправителя: {profile.name}\n📧Почта: {profile.email}", reply_markup=show_profile()) if profile else print("Ошибка при взаимодействии с профилем")
     
 @profile_router.callback_query(F.data == "create_profile")
 async def start_create_profile(callback: CallbackQuery, state: FSMContext):
@@ -47,7 +49,7 @@ async def set_email_password_profile(message: Message, state: FSMContext):
     profile = await get_profile()
     
     if profile:
-        await message.answer(f"Имя отправителя: {profile.name}\nПочта: {profile.email}", reply_markup=show_profile())
+        await message.answer(f"👤Имя отправителя: {profile.name}\n📧Почта: {profile.email}", reply_markup=show_profile())
     else:
         await message.answer("Произошла ошибка при заполнении профиля", reply_markup=create_profile())
 
@@ -63,5 +65,9 @@ async def getting_test_email(message: Message, state: FSMContext):
     await state.clear()
     profile = await get_profile()
     
-    res = await send_test_mail(test_email=profile.email, test_email_password=profile.email_password, name=profile.name, mail_to=message.text)
-    await message.answer(f"Имя отправителя: {profile.name}\nПочта: {profile.email}\nСтатус отправки: {res}", reply_markup=show_profile())
+    crypto = EmailCrypto(secret_key)
+    crypto_password = crypto.decrypt_password(profile.email_password)
+    print(f"Email password from db: {crypto_password}")
+    
+    res = await send_test_mail(test_email=profile.email, test_email_password=crypto_password, name=profile.name, mail_to=message.text)
+    await message.answer(f"👤Имя отправителя: {profile.name}\n📧Почта: {profile.email}\n📌Статус отправки: {res}", reply_markup=show_profile())

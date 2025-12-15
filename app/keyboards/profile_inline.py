@@ -18,15 +18,15 @@ def show_profile():
     builder = InlineKeyboardBuilder()
     
     builder.row(
-        InlineKeyboardButton(text="Изменить профиль", callback_data="create_profile")
+        InlineKeyboardButton(text="✏️Изменить профиль", callback_data="create_profile")
     )
     
     builder.row(
-        InlineKeyboardButton(text="Отправить тестовое сообщение", callback_data="send_test_mail")
+        InlineKeyboardButton(text="✉️Отправить тестовое сообщение", callback_data="send_test_mail")
     )
     
     builder.row(
-        InlineKeyboardButton(text="Назад", callback_data="back_start")
+        InlineKeyboardButton(text="◀️Назад", callback_data="back_start")
     )
     
     builder.adjust(2)

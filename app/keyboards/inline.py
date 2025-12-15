@@ -5,21 +5,18 @@ from ..database.requests import get_contractors, is_year, get_date_with_noload, 
 from ..database.models import Contractor, Date
 from pytz import timezone
 from datetime import datetime
-from dotenv import load_dotenv
-import os
 import calendar
 from app.utils.generate import MONTHS, DATE_WEEK
+from app.utils.config import tz_name as tz_str
 
-load_dotenv()
-
-tz_str = os.getenv("TIME_ZONE", "Asia/Yekaterinburg")
 tz = timezone(tz_str)
 
 def start_menu():
     buttons = [
-        [InlineKeyboardButton(text="Контрагенты", callback_data="list_contractors")],
-        [InlineKeyboardButton(text="Календарь", callback_data="calendar_years")],
-        [InlineKeyboardButton(text="Профиль", callback_data="profile")]
+        [InlineKeyboardButton(text="👥 Контрагенты", callback_data="list_contractors"), InlineKeyboardButton(text="📅 Календарь", callback_data="calendar_years")],
+        # [],
+        [InlineKeyboardButton(text="👤 Профиль", callback_data="profile")],
+        [InlineKeyboardButton(text="❓ Помощь", callback_data="faq")]
     ]
     
     keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
@@ -39,10 +36,10 @@ async def contractor_list_buttons():
     
     builder.row(
         InlineKeyboardButton(
-            text="Назад", callback_data="back_start"
+            text="◀️ Назад", callback_data="back_start"
         ),
         InlineKeyboardButton(
-            text="Создать контрагента", callback_data="create_contractor"
+            text="➕👤Создать контрагента", callback_data="create_contractor"
         )
     )
     
@@ -52,8 +49,8 @@ async def contractor_list_buttons():
 def contractor_buttons(contractor_id: int):
     buttons = [
         [
-            InlineKeyboardButton(text="Удалить", callback_data=f'del_{contractor_id}'),
-            InlineKeyboardButton(text="Назад", callback_data=f'list_contractors')
+            InlineKeyboardButton(text="🗑️ Удалить", callback_data=f'del_{contractor_id}'),
+            InlineKeyboardButton(text="◀️ Назад", callback_data=f'list_contractors')
         ]
     ]
     
@@ -77,14 +74,14 @@ def date_buttons(date: Date):
     
     builder.row(
         InlineKeyboardButton(
-            text='Добавить',
+            text='📝 Добавить',
             callback_data=f'from_{date.id}'
         ),
         InlineKeyboardButton(
-            text="Назад", callback_data=f"mth_{s_year}_{s_month}"
+            text="◀️ Назад", callback_data=f"mth_{s_year}_{s_month}"
         ),
         InlineKeyboardButton(
-            text="Удалить дату", callback_data=f"deldate_{date.id}_{s_year}_{s_month}"
+            text="🗑️ Удалить дату", callback_data=f"deldate_{date.id}_{s_year}_{s_month}"
         )
     )
     
@@ -106,7 +103,7 @@ async def add_contractor_by_date_buttons(date_id: int):
         
     builder.row(
         InlineKeyboardButton(
-            text="Назад", callback_data=f'dtid_{date_id}'
+            text="◀️ Назад", callback_data=f'dtid_{date_id}'
         )
     )
     
@@ -127,7 +124,7 @@ def show_years():
             callback_data=f"yr_{this_year+1}"
         ),
         InlineKeyboardButton(
-            text="Назад",
+            text="◀️ Назад",
             callback_data="back_start"
         )
     )
@@ -152,7 +149,7 @@ def show_months(*, year):
     
     builder.row(
         InlineKeyboardButton(
-            text="Назад",
+            text="◀️ Назад",
             callback_data="calendar_years"
         )
     )
@@ -184,7 +181,7 @@ async def show_dates(*, month: str, year: str):
             )
         )
         
-    builder.row(InlineKeyboardButton(text="Назад", callback_data=f"yr_{year}"))
+    builder.row(InlineKeyboardButton(text="◀️ Назад", callback_data=f"yr_{year}"))
     
     builder.adjust(7)
     return builder.as_markup()
@@ -196,14 +193,14 @@ def generate_date_buttons(*, raw_date: str):
     
     builder.row(
         InlineKeyboardButton(
-            text="Заполнить дату",
+            text="📝 Заполнить дату",
             callback_data=f"create_date_{raw_date}"
         )
     )
     
     builder.row(
         InlineKeyboardButton(
-            text="Назад",
+            text="◀️ Назад",
             callback_data=f"mth_{s_year}_{s_month}"
         )
     )

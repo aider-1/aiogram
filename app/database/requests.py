@@ -8,8 +8,9 @@ from datetime import date as date_format
 from pytz import timezone
 import logging
 import os
-
-tz_name = os.getenv("TIME_ZONE", "Asia/Yekaterinburg")
+from dotenv import load_dotenv
+from app.utils.generate import EmailCrypto
+from app.utils.config import tz_name, secret_key
 
 
 async def get_contractors() -> list[Contractor]:
@@ -209,16 +210,22 @@ async def get_profile() -> Profile | None:
     
 async def set_profile(*, name: str, email: str, email_password: str):
     async with async_session() as session:
-        profile = Profile(name=name, email=email, email_password=email_password)
+        crypto = EmailCrypto(secret_key)
+        crypto_password = crypto.encrypt_password(email_password)
+        
+        profile = Profile(name=name, email=email, email_password=crypto_password)
         session.add(profile)
         
         await session.commit()
 
 async def update_profile(*, name: str, email: str, email_password: str):
     async with async_session() as session:
+        crypto = EmailCrypto(secret_key)
+        crypto_password = crypto.encrypt_password(email_password)
+        
         current_profile = await session.scalar(select(Profile))
         current_profile.name = name
         current_profile.email = email
-        current_profile.email_password = email_password
+        current_profile.email_password = crypto_password
         
         await session.commit()

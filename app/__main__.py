@@ -5,20 +5,19 @@ from app.handlers.dates.create_date import dates
 from app.handlers.dates.cal_navigate import cal
 from app.handlers.contracrors.contractors_navigate import cont_route
 from app.handlers.profile.profile import profile_router
+from app.handlers.faq.faq_handler import faq_router
 import os
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from app.scheduler.sched import send_scheduled_message
 from apscheduler.triggers.cron import CronTrigger
-from app.database.models import engine
+from app.utils.config import tz_name as time_zone
 from dotenv import load_dotenv
 import asyncio
 import logging
 
-
 load_dotenv()
 
 bot_token = os.getenv("BOT_TOKEN")
-time_zone = os.getenv("TIME_ZONE", "Asia/Yekaterinburg")
 
 bot = Bot(token=bot_token)
 dp = Dispatcher()
@@ -29,7 +28,7 @@ async def main():
         
         scheduler.add_job(
             send_scheduled_message,
-            trigger=CronTrigger(minute="*/15", hour="12-23", timezone=time_zone), #"*/1"
+            trigger=CronTrigger(minute="*/15", hour="12-21", timezone=time_zone), #"*/1"
             id="send_scheduled_message",
             coalesce=True,
             max_instances=1,
@@ -43,6 +42,7 @@ async def main():
         dp.include_router(router=cal)
         dp.include_router(router=cont_route)
         dp.include_router(router=profile_router)
+        dp.include_router(router=faq_router)
         await bot.delete_webhook(drop_pending_updates=True)
         await dp.start_polling(bot)
     except Exception as e:

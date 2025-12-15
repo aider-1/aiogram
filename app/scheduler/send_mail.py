@@ -5,11 +5,6 @@ from app.database.models import Contractor
 from app.database.requests import set_last_sent
 from datetime import datetime
 import logging
-import os
-from dotenv import load_dotenv
-import ssl
-
-load_dotenv()
 
 # email = os.getenv("EMAIL")
 # email_password = os.getenv("EMAIL_PASSWORD")

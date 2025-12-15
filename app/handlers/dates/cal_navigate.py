@@ -6,8 +6,7 @@ from aiogram.types import Message, callback_query
 from aiogram.types.callback_query import CallbackQuery
 from aiogram.fsm.context import FSMContext
 from app.database.requests import get_date_by_id
-from app.keyboards.inline import show_dates, show_months, tz, generate_date_buttons, date_buttons
-from datetime import date
+from app.keyboards.inline import show_dates, show_months, generate_date_buttons, date_buttons
 
 
 cal = Router()
@@ -45,8 +44,8 @@ async def exist_date(callback: CallbackQuery):
     date_info = await get_date_by_id(id=date_id)
     
     kb = date_buttons(date_info)
-    await callback.message.edit_text(f"Дата отправки: {date_info.date.isoformat()}\nТема сообщения: {date_info.theme}\n"
-    f"Текст для отправки: {date_info.text_for_send}\nНажмите на контрагента, чтобы отвязать его от выбранной даты", reply_markup=kb)
+    await callback.message.edit_text(f"📅Дата отправки: {date_info.date.isoformat()}\n🧾Тема сообщения: {date_info.theme}\n"
+    f"✉️Текст для отправки: {date_info.text_for_send}\n📌Нажмите на контрагента, чтобы отвязать его от выбранной даты", reply_markup=kb)
 
 # kb = date_buttons(date_info)
 #         await callback.message.edit_text(f"Дата отправки: {date_info.date.isoformat()}\nТема сообщения: {date_info.theme}\n"
