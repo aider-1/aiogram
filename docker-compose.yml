@@ -19,7 +19,7 @@
         alembic upgrade head
       '
     volumes:
-      - ./app:/aiogram/app
+      - ./app:/aiogram/app:rw
     restart: "no"
 
   app:
