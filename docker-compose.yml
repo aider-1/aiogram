@@ -3,6 +3,8 @@
     build:
       context: .
       dockerfile: ./app/Dockerfile
+    networks:
+      - tg_bot
     extra_hosts:
       - "host.docker.internal:host-gateway"
     env_file:
@@ -29,6 +31,8 @@
     command: python -m app
     depends_on:
       - migrator
+    networks:
+      - tg_bot
     extra_hosts:
       - "host.docker.internal:host-gateway"
     env_file:
@@ -38,3 +42,10 @@
       - ./alembic.ini:/aiogram/alembic.ini:ro
     restart: unless-stopped
     tty: true
+  
+networks:
+  tg_bot:
+    driver: bridge
+    ipam:
+      config:
+       - subnet: 172.30.10.0/24
