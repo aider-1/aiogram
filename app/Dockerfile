@@ -4,6 +4,8 @@ WORKDIR /aiogram2/app
 
 RUN pip install --upgrade pip
 RUN pip install --upgrade setuptools
+RUN apt-get update && apt-get install -y --no-install-recommends postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY /app/requirements.txt .
 

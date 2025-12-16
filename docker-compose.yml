@@ -1,32 +1,24 @@
 ﻿services:
-  postgres:
-    image: postgres:latest
-    container_name: postgres_container
+  migrator:
+    build:
+      context: .
+      dockerfile: ./app/Dockerfile
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     env_file:
-      - .env
-    environment:
-      POSTGRES_USER: ${DB_USERNAME:-postgres_user}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres_password}
-      POSTGRES_DB: ${DB_NAME:-postgres_db}
-      PGDATA: /var/lib/postgresql/data/pgdata
-    volumes:
-      - pgdata:/var/lib/postgresql/data/pgdata
+    - .env
     command: >
-      postgres -c max_connections=1000
-               -c shared_buffers=256MB
-               -c effective_cache_size=768MB
-               -c maintenance_work_mem=64MB
-               -c checkpoint_completion_target=0.7
-               -c wal_buffers=16MB
-               -c default_statistics_target=100
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres_user} -d ${DB_NAME:-postgres_db}" ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    restart: unless-stopped
-    tty: true
-    stdin_open: true
+      sh -lc '
+        echo "Waiting for Postgres...";
+        until pg_isready -h "$MIGRATOR_PGHOST" -p "$MIGRATOR_PGPORT" -U "$MIGRATOR_PGUSER" -d "$MIGRATOR_PGDATABASE"; do
+          sleep 1;
+        done;
+        echo "Postgres is ready. Running migrations...";
+        alembic upgrade head
+      '
+    volumes:
+      - ./app:/aiogram/app
+    restart: "no"
 
   app:
     build:
@@ -36,19 +28,13 @@
     working_dir: /aiogram
     command: python -m app
     depends_on:
-      postgres:
-        condition: service_healthy
+      - migrator
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     env_file:
       - .env
     volumes:
       - ./app:/aiogram/app:rw
       - ./alembic.ini:/aiogram/alembic.ini:ro
-    environment:
-      DB_HOST: postgres
-      DB_PORT: 5432
     restart: unless-stopped
     tty: true
-
-volumes:
-  pgdata:
-    driver: local
