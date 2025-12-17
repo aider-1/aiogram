@@ -16,7 +16,7 @@ async def send_email(*, mail_to: list[Contractor], subject: str, text: str, date
                 msg["Subject"] = subject
                 msg["To"] = cont.contact_information
                 msg.set_content(text.format(имя=cont.name, дата=date.isoformat(), почта=cont.contact_information))
-                msg.set_content("utf-8")
+                msg.set_charset("utf-8")
                 
                 res = await sc.send_message(msg)
                 
@@ -38,7 +38,8 @@ async def send_test_mail(*, test_email: str, test_email_password: str, name: str
             
             plain = "Тестовая отправка письма."
 
-            msg.set_content(plain, charset="utf-8")
+            msg.set_content(plain)
+            msg.set_charset("utf-8")
          
             res = await sc.send_message(msg)
             
