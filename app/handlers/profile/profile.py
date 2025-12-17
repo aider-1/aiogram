@@ -68,7 +68,6 @@ async def getting_test_email(message: Message, state: FSMContext):
     
     crypto = EmailCrypto(secret_key)
     crypto_password = crypto.decrypt_password(profile.email_password)
-    print(f"Email password from db: {crypto_password}")
     
     res = await send_test_mail(test_email=profile.email, test_email_password=crypto_password, name=profile.name, mail_to=message.text)
     await message.answer(f"👤Имя отправителя: {profile.name}\n📧Почта: {profile.email}\n📌Статус отправки: {res}", reply_markup=show_profile())
