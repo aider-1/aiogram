@@ -17,7 +17,7 @@ async def send_scheduled_message():
             print(cont.name)
     
         await send_email(mail_to=contractors, subject=date.theme, text=date.text_for_send, date=date.date,
-        date_id=date.id, email=profile.email, email_password=crypto_password, sender_name=profile.name) if contractors else print("Нет сообщений")
+        date_id=date.id, email=profile.email, email_password=crypto_password, sender_name=profile.name, signature=profile.signature) if contractors else print("Нет сообщений")
     else:
         print("Профиль не заполнен")
     

@@ -63,3 +63,4 @@ class Profile(Base):
     name: Mapped[str] = mapped_column(nullable=False)
     email: Mapped[str] = mapped_column(nullable=False, unique=True, index=True)
     email_password: Mapped[str] = mapped_column(nullable=False)
+    signature: Mapped[Optional[str]] = mapped_column(nullable=True)

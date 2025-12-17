@@ -16,7 +16,7 @@ async def main_profile(callback: CallbackQuery):
     await callback.answer()
     profile = await get_profile()
     
-    await callback.message.edit_text(f"👤Имя отправителя: {profile.name}\n📧Почта: {profile.email}", reply_markup=show_profile()) if profile else print("Ошибка при взаимодействии с профилем")
+    await callback.message.edit_text(f"👤Имя отправителя: {profile.name}\n📧Почта: {profile.email}\n✍️Подпись:\n{profile.signature}", reply_markup=show_profile()) if profile else print("Ошибка при взаимодействии с профилем")
     
 @profile_router.callback_query(F.data == "create_profile")
 async def start_create_profile(callback: CallbackQuery, state: FSMContext):
@@ -35,22 +35,28 @@ async def set_email_profile(message: Message, state: FSMContext):
     await state.update_data(email=message.text)
     await state.set_state(CreateProfile.email_password)
     await message.answer("Введите пароль электронной почты (создайте пароль только для отправки сообщений ради безопасности)")
-    
+  
 @profile_router.message(CreateProfile.email_password)
 async def set_email_password_profile(message: Message, state: FSMContext):
     await state.update_data(email_password=message.text)
+    await state.set_state(CreateProfile.signature)
+    await message.answer("Введите подпись к письму. Пример:\nС уважением,\nАлександр Александрович\nСотрудник компании Apple")
+
+@profile_router.message(CreateProfile.signature)
+async def set_signature(message: Message, state: FSMContext):
+    await state.update_data(signature=message.text)
     data = await state.get_data()
     
     is_profile = await get_profile()
     
-    await set_profile(name=data.get("name"), email=data.get("email"), email_password=data.get("email_password")) if not is_profile else await update_profile(name=data.get("name"), email=data.get("email"), email_password=data.get("email_password"))
+    await set_profile(name=data.get("name"), email=data.get("email"), email_password=data.get("email_password"), signature=data.get("signature")) if not is_profile else await update_profile(name=data.get("name"), email=data.get("email"), email_password=data.get("email_password"), signature=data.get("signature"))
     
     await state.clear()
     
     profile = await get_profile()
     
     if profile:
-        await message.answer(f"👤Имя отправителя: {profile.name}\n📧Почта: {profile.email}", reply_markup=show_profile())
+        await message.answer(f"👤Имя отправителя: {profile.name}\n📧Почта: {profile.email}\n✍️Подпись:\n{profile.signature}", reply_markup=show_profile())
     else:
         await message.answer("Произошла ошибка при заполнении профиля", reply_markup=create_profile())
 
@@ -69,5 +75,5 @@ async def getting_test_email(message: Message, state: FSMContext):
     crypto = EmailCrypto(secret_key)
     crypto_password = crypto.decrypt_password(profile.email_password)
     
-    res = await send_test_mail(test_email=profile.email, test_email_password=crypto_password, name=profile.name, mail_to=message.text)
-    await message.answer(f"👤Имя отправителя: {profile.name}\n📧Почта: {profile.email}\n📌Статус отправки: {res}", reply_markup=show_profile())
+    res = await send_test_mail(test_email=profile.email, test_email_password=crypto_password, name=profile.name, mail_to=message.text, signature=profile.signature)
+    await message.answer(f"👤Имя отправителя: {profile.name}\n📧Почта: {profile.email}\n✍️Подпись:\n{profile.signature}\n📌Статус отправки: {res}", reply_markup=show_profile())

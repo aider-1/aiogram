@@ -205,17 +205,17 @@ async def get_profile() -> Profile | None:
 
         return res if res else None
     
-async def set_profile(*, name: str, email: str, email_password: str):
+async def set_profile(*, name: str, email: str, email_password: str, signature: str):
     async with async_session() as session:
         crypto = EmailCrypto(secret_key)
         crypto_password = crypto.encrypt_password(email_password)
         
-        profile = Profile(name=name, email=email, email_password=crypto_password)
+        profile = Profile(name=name, email=email, email_password=crypto_password, signature=signature)
         session.add(profile)
         
         await session.commit()
 
-async def update_profile(*, name: str, email: str, email_password: str):
+async def update_profile(*, name: str, email: str, email_password: str, signature: str):
     async with async_session() as session:
         crypto = EmailCrypto(secret_key)
         crypto_password = crypto.encrypt_password(email_password)
@@ -224,5 +224,6 @@ async def update_profile(*, name: str, email: str, email_password: str):
         current_profile.name = name
         current_profile.email = email
         current_profile.email_password = crypto_password
+        current_profile.signature = signature
         
         await session.commit()

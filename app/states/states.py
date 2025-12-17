@@ -17,6 +17,7 @@ class CreateProfile(StatesGroup):
     name = State()
     email = State()
     email_password = State()
+    signature = State()
 
 class Testing(StatesGroup):
     test_mail_to = State()
