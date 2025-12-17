@@ -4,3 +4,4 @@
 .dockerignore
 __pycache__/
 old-compose.txt
+/pgdata

@@ -1,5 +1,5 @@
 import gc
-from .models import Contractor, Date, ReceiptMethod, ContractorDateLink, Profile
+from .models import Contractor, Date, ContractorDateLink, Profile
 from .models import async_session
 from sqlalchemy import select, or_, and_, extract
 from sqlalchemy.orm import noload
@@ -37,9 +37,6 @@ async def add_contractor(*, name: str, contact_information: str):
     async with async_session() as session:
         try:
             contractor = Contractor(name=name, contact_information=contact_information)
-    
-            if '+7' in contact_information:
-                contractor.method = ReceiptMethod.WHAPSAPP
         
             session.add(contractor)
             await session.commit()

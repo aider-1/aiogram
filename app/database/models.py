@@ -17,7 +17,7 @@ db_url = URL.create(
     drivername="postgresql+asyncpg",
     username=os.getenv("DB_USERNAME", "postgres"),
     password=os.getenv("DB_PASSWORD", "root"),
-    host=os.getenv("DB_HOST", "localhost"),
+    host=os.getenv("DB_HOST"),
     port=int(os.getenv("DB_PORT", "5432")),
     database=os.getenv("DB_NAME", "sender"),
 )
@@ -40,17 +40,12 @@ class Date(Base):
     )
     contractors: Mapped[List["Contractor"]] = relationship(back_populates='dates', secondary='contractor_date_link', lazy='selectin')
 
-class ReceiptMethod(Enum):
-    WHAPSAPP = "WHATSAPP"
-    EMAIL = "EMAIL"
-
 class Contractor(Base):
     __tablename__ = 'contractors'
     
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(50), unique=True)
     contact_information: Mapped[str] = mapped_column(String(50))
-    method: Mapped[ReceiptMethod] = mapped_column(default=ReceiptMethod.EMAIL)
     dates: Mapped[List["Date"]] = relationship(back_populates='contractors', secondary='contractor_date_link', lazy='selectin')
 
 class ContractorDateLink(Base):

@@ -28,7 +28,7 @@ async def main():
         
         scheduler.add_job(
             send_scheduled_message,
-            trigger=CronTrigger(minute="*/15", hour="12-21", timezone=time_zone), #"*/1"
+            trigger=CronTrigger(minute="*/15", hour="7-21", timezone=time_zone), #"*/1"
             id="send_scheduled_message",
             coalesce=True,
             max_instances=1,
