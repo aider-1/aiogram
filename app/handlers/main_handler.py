@@ -42,7 +42,7 @@ async def show_dates(callback: CallbackQuery):
 async def from_date(callback: CallbackQuery):
     await callback.answer()
     date_id = int(callback.data.replace('from_', ''))
-    kb = await add_contractor_by_date_buttons(date_id)
+    kb = await add_contractor_by_date_buttons(date_id, page=0)
     await callback.message.edit_text("Выберите контрагента для добавления на эту дату:", reply_markup=kb)
     
 @router.callback_query(F.data.startswith('add_'))
@@ -53,7 +53,14 @@ async def add_contractor_to_date(callback: CallbackQuery):
         await callback.answer(text="Контрагент добавлен на дату", show_alert=True)
     else:
         await callback.answer(text="Ошибка при добавлении контрагента на дату", show_alert=True)
-    
+
+@router.callback_query(F.data.startswith("addpage:"))
+async def add_contractors_page(cb: CallbackQuery):
+    await cb.answer()
+    _, date_id, page = cb.data.split(":")
+    kb = await add_contractor_by_date_buttons(int(date_id), page=int(page))
+    await cb.message.edit_text("Выберите контрагента:", reply_markup=kb)
+
 @router.callback_query(F.data.startswith('cl_'))
 async def clean_contractor_from_date(callback: CallbackQuery):
     date_id, cont_id = map(int, callback.data.replace('cl_', '').split('_'))

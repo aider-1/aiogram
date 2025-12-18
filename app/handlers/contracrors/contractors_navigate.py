@@ -16,8 +16,15 @@ cont_route = Router()
 @cont_route.callback_query(F.data == 'list_contractors')
 async def list_contractors(callback: CallbackQuery):
     await callback.answer()
-    kb = await contractor_list_buttons()
+    kb = await contractor_list_buttons(page=0)
     await callback.message.edit_text("Список контрагентов:", reply_markup=kb)
+
+@cont_route.callback_query(F.data.startswith("contpage:"))
+async def contractors_page(cb: CallbackQuery):
+    await cb.answer()
+    page = int(cb.data.split(":", 1)[1])
+    kb = await contractor_list_buttons(page=page)
+    await cb.message.edit_text("Список контрагентов:", reply_markup=kb)
 
 @cont_route.callback_query(F.data.startswith('cont_'))
 async def contractor_info(callback: CallbackQuery):

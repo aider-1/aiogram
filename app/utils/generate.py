@@ -1,5 +1,14 @@
 from fernet import Fernet
 from app.utils.config import acces_ids
+from app.database.models import SentMessageLog
+
+def generate_text_logs(logs: list[SentMessageLog]) -> str:
+    s = ""
+    
+    for log in logs:
+        s += f"--------------------\nДата и время отправки: {log.sent_time.strftime("%Y-%m-%d %H:%M:%S")}\nПочта: {log.email}\nСтатус отправки: {log.status}\nСообщение: {log.message}\n"
+
+    return s
 
 def get_ids_array():
     return [int(id) for id in acces_ids.split(":")]

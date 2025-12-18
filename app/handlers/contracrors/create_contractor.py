@@ -27,7 +27,7 @@ async def add_email(message: Message, state: FSMContext):
     await state.update_data(contact_information = message.text.strip())
     data = await state.get_data()
     await add_contractor_to_db(name=data['name'], contact_information=data['contact_information'])
-    await message.answer("Список контрагентов обновлен", reply_markup=await contractor_list_buttons())
+    await message.answer("Список контрагентов обновлен", reply_markup=await contractor_list_buttons(page=0))
     
     await state.clear()
     

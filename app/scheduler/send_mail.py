@@ -1,8 +1,10 @@
 from aiosmtplib import SMTP, SMTPStatus
 from email.message import EmailMessage
 from app.database.models import Contractor
-from app.database.requests import set_last_sent
+from app.database.requests import set_last_sent, add_message_log
 from datetime import datetime
+from pytz import timezone
+from app.utils.config import tz_name
 import logging
 
 async def send_email(*, mail_to: list[Contractor], subject: str, text: str, date: datetime.date, date_id: int, email: str, email_password: str, sender_name: str, signature: str):
@@ -21,12 +23,14 @@ async def send_email(*, mail_to: list[Contractor], subject: str, text: str, date
                 msg.set_content(plain)
                 msg.set_charset("utf-8")
                 
-                res = await sc.send_message(msg)
-                
-                if not res[0]:
+                code, response = await sc.send_message(msg)
+                sent_message_time = datetime.now(tz=timezone(tz_name))
+                if not code:
                     await set_last_sent(date_id, cont.id)
+                    await add_message_log(contractor_name=cont.name, email=cont.contact_information, status=200, message=response, sent_time=sent_message_time)
                 else:
-                    logging.error(f"Send email ошибка вне except: {res}")
+                    await add_message_log(contractor_name=cont.name, email=cont.contact_information, status=code, message=response, sent_time=sent_message_time)
+                    logging.error(f"Send email ошибка вне except: {code, response}")
     except Exception as e:
         logging.error(f"Ошибка при отправке: {e}")
     

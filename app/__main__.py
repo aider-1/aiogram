@@ -6,6 +6,7 @@ from app.handlers.dates.cal_navigate import cal
 from app.handlers.contracrors.contractors_navigate import cont_route
 from app.handlers.profile.profile import profile_router
 from app.handlers.faq.faq_handler import faq_router
+from app.handlers.logs.logs_handler import logs_router
 import os
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from app.scheduler.sched import send_scheduled_message
@@ -43,6 +44,7 @@ async def main():
         dp.include_router(router=cont_route)
         dp.include_router(router=profile_router)
         dp.include_router(router=faq_router)
+        dp.include_router(router=logs_router)
         await bot.delete_webhook(drop_pending_updates=True)
         await dp.start_polling(bot)
     except Exception as e:

@@ -64,3 +64,13 @@ class Profile(Base):
     email: Mapped[str] = mapped_column(nullable=False, unique=True, index=True)
     email_password: Mapped[str] = mapped_column(nullable=False)
     signature: Mapped[Optional[str]] = mapped_column(nullable=True)
+
+class SentMessageLog(Base):
+    __tablename__ = "sent_message_logs"
+    
+    id: Mapped[int] = mapped_column(primary_key=True)
+    contractor_name: Mapped[str] = mapped_column(String(50), nullable=False)
+    sent_time: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    email: Mapped[str] = mapped_column(nullable=False)
+    status: Mapped[int] = mapped_column(nullable=False)
+    message: Mapped[str] = mapped_column(nullable=True)

@@ -1,7 +1,7 @@
 import gc
-from .models import Contractor, Date, ContractorDateLink, Profile
+from .models import Contractor, Date, ContractorDateLink, Profile, SentMessageLog
 from .models import async_session
-from sqlalchemy import select, or_, and_, extract
+from sqlalchemy import select, or_, and_, extract, func
 from sqlalchemy.orm import noload
 from datetime import datetime
 from datetime import date as date_format
@@ -12,13 +12,70 @@ from dotenv import load_dotenv
 from app.utils.generate import EmailCrypto
 from app.utils.config import tz_name, secret_key
 
-
 async def get_contractors() -> list[Contractor]:
     async with async_session() as session:
         query = select(Contractor)
         contractors = await session.execute(query)
         
         return contractors.scalars().all()
+
+async def get_contractors_count() -> int:
+    async with async_session() as session:
+        return int(await session.scalar(select(func.count()).select_from(Contractor)) or 0)
+
+async def get_contractors_page(*, limit: int, offset: int) -> list[Contractor]:
+    async with async_session() as session:
+        stmt = select(Contractor).order_by(Contractor.id).limit(limit).offset(offset)
+        res = await session.execute(stmt)
+        return res.scalars().all()
+    
+async def get_date_contractors_count(*, date_id: int) -> int:
+    async with async_session() as session:
+        stmt = select(func.count()).select_from(ContractorDateLink).where(ContractorDateLink.date_id == date_id)
+        return int(await session.scalar(stmt) or 0)
+
+async def get_date_contractors_page(*, date_id: int, limit: int, offset: int) -> list[Contractor]:
+    async with async_session() as session:
+        stmt = (
+            select(Contractor)
+            .join(ContractorDateLink, ContractorDateLink.contractor_id == Contractor.id)
+            .where(ContractorDateLink.date_id == date_id)
+            .order_by(Contractor.id)
+            .limit(limit)
+            .offset(offset)
+        )
+        res = await session.execute(stmt)
+        return res.scalars().all()
+
+async def get_available_contractors_for_date_count(*, date_id: int) -> int:
+    async with async_session() as session:
+        linked = select(ContractorDateLink.contractor_id).where(ContractorDateLink.date_id == date_id)
+        stmt = select(func.count()).select_from(Contractor).where(~Contractor.id.in_(linked))
+        return int(await session.scalar(stmt) or 0)
+
+async def get_available_contractors_for_date_page(*, date_id: int, limit: int, offset: int) -> list[Contractor]:
+    async with async_session() as session:
+        linked = select(ContractorDateLink.contractor_id).where(ContractorDateLink.date_id == date_id)
+        stmt = (
+            select(Contractor)
+            .where(~Contractor.id.in_(linked))
+            .order_by(Contractor.id)
+            .limit(limit)
+            .offset(offset)
+        )
+        res = await session.execute(stmt)
+        return res.scalars().all()
+
+async def get_logs_count():
+    async with async_session() as session:
+        stmt = select(func.count()).select_from(SentMessageLog)
+        return int(await session.scalar(stmt) or 0)
+
+async def get_logs_page(limit: int, offset: int):
+        async with async_session() as session:
+            stmt = select(SentMessageLog).order_by(SentMessageLog.id).limit(limit).offset(offset)
+            res = await session.execute(stmt)
+            return res.scalars().all()
 
 async def create_date(*, d, th, text) -> bool:
     async with async_session() as session:
@@ -225,5 +282,12 @@ async def update_profile(*, name: str, email: str, email_password: str, signatur
         current_profile.email = email
         current_profile.email_password = crypto_password
         current_profile.signature = signature
+        
+        await session.commit()
+
+async def add_message_log(*, contractor_name: str, email: str, status: int, message: any, sent_time: datetime):
+    async with async_session() as session:
+        log = SentMessageLog(contractor_name=contractor_name, email=email, status=status, message=message, sent_time=sent_time)
+        session.add(log)
         
         await session.commit()

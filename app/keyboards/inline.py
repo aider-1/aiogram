@@ -1,7 +1,7 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from ..database.models import Date
-from ..database.requests import get_contractors, is_year, get_date_with_noload, get_dates_by_year_month
+from ..database.requests import get_contractors, get_contractors_count, get_contractors_page, get_dates_by_year_month, is_year, get_date_with_noload, get_available_contractors_for_date_count, get_available_contractors_for_date_page
 from ..database.models import Contractor, Date
 from pytz import timezone
 from datetime import datetime
@@ -16,35 +16,45 @@ def start_menu():
         [InlineKeyboardButton(text="👥 Контрагенты", callback_data="list_contractors"), InlineKeyboardButton(text="📅 Календарь", callback_data="calendar_years")],
         # [],
         [InlineKeyboardButton(text="👤 Профиль", callback_data="profile")],
-        [InlineKeyboardButton(text="❓ Помощь", callback_data="faq")]
+        [InlineKeyboardButton(text="❓ Помощь", callback_data="faq")],
+        [InlineKeyboardButton(text="Журнал сообщений", callback_data="logs")]
     ]
     
     keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
     return keyboard
 
+async def contractor_list_buttons(page: int = 0):
+    PER_PAGE = 30
+    total = await get_contractors_count()
+    pages = max(1, (total + PER_PAGE - 1) // PER_PAGE)
+    page = max(0, min(page, pages - 1))
+    items = await get_contractors_page(limit=PER_PAGE, offset=page * PER_PAGE)
 
-async def contractor_list_buttons():
-    contractors = await get_contractors()
-    builder = InlineKeyboardBuilder()
-    for cont in contractors:
-        builder.add(  #row
-            InlineKeyboardButton(
-                text=cont.name,
-                callback_data=f'cont_{cont.id}'
-            )
-        )
+    b = InlineKeyboardBuilder()
+    for c in items:
+        b.button(text=c.name, callback_data=f"cont_{c.id}")
+    b.adjust(2)
+
+    # пагинация
+    nav = []
+    if page > 0:
+        nav.append(InlineKeyboardButton(text="◀️", callback_data=f"contpage:{page-1}"))
+        nav.append(InlineKeyboardButton(text=f"{page+1}/{pages}", callback_data="noop"))
+    if page < pages-1:
+        nav.append(InlineKeyboardButton(text="▶️", callback_data=f"contpage:{page+1}"))
+    if nav:
+        b.row(*nav, width=len(nav))
     
-    builder.row(
+    b.row(
         InlineKeyboardButton(
             text="◀️ Назад", callback_data="back_start"
         ),
         InlineKeyboardButton(
             text="➕👤Создать контрагента", callback_data="create_contractor"
-        )
+        ), width=2
     )
     
-    builder.adjust(2)
-    return builder.as_markup()
+    return b.as_markup()
 
 def contractor_buttons(contractor_id: int):
     buttons = [
@@ -88,27 +98,35 @@ def date_buttons(date: Date):
     builder.adjust(2)
     return builder.as_markup()
 
-async def add_contractor_by_date_buttons(date_id: int):
-    builder = InlineKeyboardBuilder()
-    contractors = await get_contractors()
-    # date_for_back = await get_date_with_noload(date_id=date_id)
-    
-    for cont in contractors:
-        builder.row(
-            InlineKeyboardButton(
-                text=cont.name,
-                callback_data=f'add_{date_id}_{cont.id}'
-            )
-        )
-        
-    builder.row(
+async def add_contractor_by_date_buttons(date_id: int, page=0):
+    PER_PAGE = 30
+    total = await get_available_contractors_for_date_count(date_id=date_id)
+    pages = max(1, (total + PER_PAGE - 1) // PER_PAGE)
+    page = max(0, min(page, pages - 1))
+    items = await get_available_contractors_for_date_page(date_id=date_id, limit=PER_PAGE, offset=page * PER_PAGE)
+
+    b = InlineKeyboardBuilder()
+    for c in items:
+        b.button(text=c.name, callback_data=f'add_{date_id}_{c.id}')
+    b.adjust(2)
+
+    # пагинация
+    nav = []
+    if page > 0:
+        nav.append(InlineKeyboardButton(text="◀️", callback_data=f"addpage:{date_id}:{page-1}"))
+        nav.append(InlineKeyboardButton(text=f"{page+1}/{pages}", callback_data="noop"))
+    if page < pages-1:
+        nav.append(InlineKeyboardButton(text="▶️", callback_data=f"addpage:{date_id}:{page+1}"))
+    if nav:
+        b.row(*nav, width=len(nav)) 
+
+    b.row(
         InlineKeyboardButton(
             text="◀️ Назад", callback_data=f'dtid_{date_id}'
         )
     )
-    
-    builder.adjust(2)
-    return builder.as_markup()
+
+    return b.as_markup()
 
 def show_years():
     this_year = datetime.now(tz=tz).year
