@@ -1,12 +1,16 @@
 from fernet import Fernet
 from app.utils.config import acces_ids
 from app.database.models import SentMessageLog
+from app.utils.config import tz_name
+from zoneinfo import ZoneInfo
 
 def generate_text_logs(logs: list[SentMessageLog]) -> str:
     s = ""
     
+    tz = ZoneInfo(tz_name)
+    
     for log in logs:
-        s += f"--------------------\nДата и время отправки: {log.sent_time.strftime("%Y-%m-%d %H:%M:%S")}\nПочта: {log.email}\nСтатус отправки: {log.status}\nСообщение: {log.message}\n"
+        s += f"--------------------\nДата и время отправки: {log.sent_time.astimezone(tz).strftime("%Y-%m-%d %H:%M:%S")}\nПочта: {log.email}\nСтатус отправки: {log.status}\nСообщение: {log.message}\n"
 
     return s
 

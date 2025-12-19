@@ -24,7 +24,7 @@ async def send_email(*, mail_to: list[Contractor], subject: str, text: str, date
                 msg.set_charset("utf-8")
                 
                 code, response = await sc.send_message(msg)
-                sent_message_time = datetime.now(tz=timezone(tz_name))
+                sent_message_time = datetime.now()
                 if not code:
                     await set_last_sent(date_id, cont.id)
                     await add_message_log(contractor_name=cont.name, email=cont.contact_information, status=200, message=response, sent_time=sent_message_time)

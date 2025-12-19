@@ -1,7 +1,7 @@
 import gc
 from .models import Contractor, Date, ContractorDateLink, Profile, SentMessageLog
 from .models import async_session
-from sqlalchemy import select, or_, and_, extract, func
+from sqlalchemy import select, or_, and_, extract, func, desc
 from sqlalchemy.orm import noload
 from datetime import datetime
 from datetime import date as date_format
@@ -73,7 +73,7 @@ async def get_logs_count():
 
 async def get_logs_page(limit: int, offset: int):
         async with async_session() as session:
-            stmt = select(SentMessageLog).order_by(SentMessageLog.id).limit(limit).offset(offset)
+            stmt = select(SentMessageLog).order_by(desc(SentMessageLog.sent_time)).limit(limit).offset(offset)
             res = await session.execute(stmt)
             return res.scalars().all()
 
